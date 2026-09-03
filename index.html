@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>AI Studio - Personal Edition</title>
+  <title>AI Studio - Tinted Glass Edition</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -151,11 +151,11 @@
       <div class="px-3 sm:px-6 py-2 sm:py-3 bg-white/20 border-glass-b shrink-0">
         <div class="flex justify-between items-center mb-1">
           <span class="text-[10px] font-bold tracking-wider text-slate-500 uppercase">System Instruction</span>
-          <span id="tokenCounterBadge" class="text-[10px] text-slate-400 font-mono">0 tokens (計0文字)</span>
+          <span id="tokenCounterBadge" class="text-[10px] text-slate-600 font-mono bg-white/70 px-2 py-0.5 rounded shadow-sm">0 tokens</span>
         </div>
         <textarea id="systemInstruction" rows="1" 
           class="w-full bg-white/40 focus:bg-white/80 rounded p-1.5 text-xs text-slate-800 placeholder-slate-400 outline-none transition resize-none font-mono" 
-          placeholder="AIへの前提指示を入力..."></textarea>
+          placeholder="AIへの役割や前提指示..." oninput="triggerTokenCount()"></textarea>
       </div>
 
       <!-- チャット・チャンクリスト -->
@@ -167,7 +167,7 @@
         
         <div class="flex items-end gap-1.5 sm:gap-2.5">
           <div class="flex gap-1 shrink-0">
-            <label class="btn-tactile p-2 rounded text-slate-600 cursor-pointer" title="ローカルファイル添付 (inlineFile)">
+            <label class="btn-tactile p-2 rounded text-slate-600 cursor-pointer" title="ローカルファイル添付">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
               <input type="file" id="attachmentInput" class="hidden" onchange="handleLocalAttachment(event)">
             </label>
@@ -223,25 +223,21 @@
             <span class="font-semibold uppercase tracking-wider text-[10px] text-slate-400">Available Model</span>
             <span id="modelFetchStatus" class="text-[10px] text-blue-600 cursor-pointer hover:underline" onclick="fetchAvailableModels()">全件再取得</span>
           </div>
-          <select id="modelSelect" class="w-full bg-white/70 rounded px-2 py-1.5 text-slate-800 outline-none shadow-sm">
-            <optgroup label="Gemini 3 Series (Latest Frontier)">
-              <option value="models/gemini-3.8-flash" selected>gemini-3.8-flash (GA Flagship)</option>
+          <select id="modelSelect" class="w-full bg-white/70 rounded px-2 py-1.5 text-slate-800 outline-none shadow-sm font-mono">
+            <optgroup label="推奨・安定モデル（無料枠対応）">
+              <option value="models/gemini-2.5-flash" selected>gemini-2.5-flash (推奨・高速)</option>
+              <option value="models/gemini-1.5-flash">gemini-1.5-flash (安定無料枠)</option>
+              <option value="models/gemini-2.0-flash">gemini-2.0-flash</option>
+              <option value="models/gemini-2.5-pro">gemini-2.5-pro (高性能推論)</option>
+            </optgroup>
+            <optgroup label="Gemini 3 Series (フロンティア)">
+              <option value="models/gemini-3.8-flash">gemini-3.8-flash (GA Flagship)</option>
               <option value="models/gemini-3.7-flash">gemini-3.7-flash</option>
               <option value="models/gemini-3.5-flash">gemini-3.5-flash</option>
               <option value="models/gemini-3.1-pro-preview">gemini-3.1-pro-preview</option>
               <option value="models/gemini-3.5-flash-lite">gemini-3.5-flash-lite</option>
             </optgroup>
-            <optgroup label="Gemini 2.5 & 2.0 Series">
-              <option value="models/gemini-2.5-pro">gemini-2.5-pro</option>
-              <option value="models/gemini-2.5-flash">gemini-2.5-flash</option>
-              <option value="models/gemini-2.0-flash">gemini-2.0-flash</option>
-            </optgroup>
-            <optgroup label="Gemini 1.5 Series (Stable)">
-              <option value="models/gemini-1.5-pro">gemini-1.5-pro</option>
-              <option value="models/gemini-1.5-flash">gemini-1.5-flash</option>
-              <option value="models/gemini-1.5-flash-8b">gemini-1.5-flash-8b</option>
-            </optgroup>
-            <optgroup label="Image Generation (Imagen)">
+            <optgroup label="Imagen (Image Gen)">
               <option value="models/imagen-3.0-generate-002">imagen-3.0-generate-002</option>
             </optgroup>
           </select>
@@ -276,8 +272,8 @@
           </div>
 
           <div>
-            <div class="flex justify-between mb-1"><span>Max Tokens</span><span id="maxTokensVal" class="font-mono">65536</span></div>
-            <input id="maxTokens" type="range" min="1024" max="65536" step="1024" value="65536" class="w-full" oninput="updateSliderFill(this); document.getElementById('maxTokensVal').innerText=this.value; saveSettingsToStorage();">
+            <div class="flex justify-between mb-1"><span>Max Tokens</span><span id="maxTokensVal" class="font-mono">8192</span></div>
+            <input id="maxTokens" type="range" min="512" max="65536" step="512" value="8192" class="w-full" oninput="updateSliderFill(this); document.getElementById('maxTokensVal').innerText=this.value; saveSettingsToStorage();">
           </div>
 
           <div>
@@ -291,11 +287,12 @@
           </div>
         </div>
 
-        <!-- ツール (Code Execution含む) -->
+        <!-- ツール -->
         <div class="space-y-2 border-glass-t pt-3">
-          <span class="font-semibold uppercase tracking-wider text-[10px] text-slate-400 block">Tools & Controls</span>
-          <label class="flex items-center gap-2 cursor-pointer"><input id="enableCodeExecution" type="checkbox" checked class="rounded text-blue-600" onchange="saveSettingsToStorage()"><span>Code Execution (Python)</span></label>
-          <label class="flex items-center gap-2 cursor-pointer"><input id="enableSearchAsATool" type="checkbox" checked class="rounded text-blue-600" onchange="saveSettingsToStorage()"><span>Search As A Tool</span></label>
+          <span class="font-semibold uppercase tracking-wider text-[10px] text-slate-400 block">Tools</span>
+          <label class="flex items-center gap-2 cursor-pointer"><input id="enableCodeExecution" type="checkbox" class="rounded text-blue-600" onchange="saveSettingsToStorage()"><span>Code Execution (Python)</span></label>
+          <!-- 無料枠では429の原因となるため、デフォルトはOFF -->
+          <label class="flex items-center gap-2 cursor-pointer"><input id="enableSearchAsATool" type="checkbox" class="rounded text-blue-600" onchange="saveSettingsToStorage()"><span>Search As A Tool (※有料枠推奨)</span></label>
           <label class="flex items-center gap-2 cursor-pointer"><input id="enableGoogleMaps" type="checkbox" class="rounded text-blue-600" onchange="saveSettingsToStorage()"><span>Google Maps Grounding</span></label>
           <label class="flex items-center gap-2 cursor-pointer"><input id="enableBrowseAsATool" type="checkbox" class="rounded text-blue-600" onchange="saveSettingsToStorage()"><span>Browse As A Tool</span></label>
         </div>
@@ -310,7 +307,7 @@
 
   <script>
     // =========================================================================
-    // ユーティリティ (安全なHTMLエスケープ & Markdownフォールバック)
+    // ユーティリティ
     // =========================================================================
     function escapeHtml(str) {
       if (typeof str !== 'string') str = String(str || '');
@@ -355,24 +352,31 @@
       }
     }
 
+    // モデルパスの正規化 (models/の二重付与を防ぐ)
+    function formatModelPath(raw) {
+      if (!raw) return "models/gemini-2.5-flash";
+      const clean = raw.trim().replace(/^models\//, '');
+      return `models/${clean}`;
+    }
+
     const MAKERSUITE_MIME = "application/vnd.google-makersuite.prompt";
 
     // 内部データ
     let promptDoc = {
       runSettings: {
         temperature: 1.0,
-        model: "models/gemini-3.8-flash",
+        model: "models/gemini-2.5-flash",
         topP: 0.95,
         topK: 64,
-        maxOutputTokens: 65536,
+        maxOutputTokens: 8192,
         safetySettings: [
           { category: "HARM_CATEGORY_HARASSMENT", threshold: "OFF" },
           { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "OFF" },
           { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "OFF" },
           { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "OFF" }
         ],
-        enableCodeExecution: true,
-        enableSearchAsATool: true,
+        enableCodeExecution: false,
+        enableSearchAsATool: false, // 429回避のため初期はfalse
         enableBrowseAsATool: false,
         thinkingBudget: -1,
         googleSearch: {},
@@ -397,7 +401,7 @@
     let driveFileId = null;
 
     // =========================================================================
-    // LocalStorage 永続化
+    // LocalStorage 永続化と初期化
     // =========================================================================
     window.addEventListener('DOMContentLoaded', () => {
       const savedKey = localStorage.getItem('gemini_api_key') || '';
@@ -410,6 +414,7 @@
       document.getElementById('apiKeyInput').addEventListener('change', (e) => {
         localStorage.setItem('gemini_api_key', e.target.value.trim());
         fetchAvailableModels();
+        triggerTokenCount();
       });
       document.getElementById('oauthClientId').addEventListener('change', (e) => {
         localStorage.setItem('google_client_id', e.target.value.trim());
@@ -432,6 +437,7 @@
       if (savedKey) {
         fetchAvailableModels();
       }
+      triggerTokenCount();
     });
 
     function saveSettingsToStorage() {
@@ -456,7 +462,14 @@
       if (!raw) return;
       try {
         const s = JSON.parse(raw);
-        if (s.model) document.getElementById('modelSelect').value = s.model;
+        if (s.model) {
+          const formatted = formatModelPath(s.model);
+          const sel = document.getElementById('modelSelect');
+          if (![...sel.options].some(o => o.value === formatted)) {
+            sel.add(new Option(formatted, formatted));
+          }
+          sel.value = formatted;
+        }
         if (s.temperature) {
           document.getElementById('temperature').value = s.temperature;
           document.getElementById('tempVal').innerText = s.temperature;
@@ -538,19 +551,19 @@
           const currentVal = select.value;
           select.innerHTML = '';
 
-          const gemini3 = allModels.filter(m => m.name.includes('gemini-3'));
           const gemini2 = allModels.filter(m => m.name.includes('gemini-2'));
+          const gemini3 = allModels.filter(m => m.name.includes('gemini-3'));
           const gemini1 = allModels.filter(m => m.name.includes('gemini-1'));
           const imagen = allModels.filter(m => m.name.includes('imagen'));
           const others = allModels.filter(m => !m.name.includes('gemini-') && !m.name.includes('imagen'));
 
-          appendGroup(select, "Gemini 3 Series", gemini3);
-          appendGroup(select, "Gemini 2 Series", gemini2);
+          appendGroup(select, "Gemini 2.5 & 2.0 (推奨・無料枠安定)", gemini2);
+          appendGroup(select, "Gemini 3 Series (最新フロンティア)", gemini3);
           appendGroup(select, "Gemini 1.5 Series", gemini1);
-          appendGroup(select, "Imagen (Image Gen)", imagen);
-          appendGroup(select, "Other / Embeddings", others);
+          appendGroup(select, "Imagen (画像生成)", imagen);
+          appendGroup(select, "Other Models", others);
 
-          select.value = currentVal || (gemini3[0]?.name || allModels[0].name);
+          select.value = currentVal || (gemini2[0]?.name || allModels[0].name);
           statusEl.innerText = `完了 (${allModels.length}件)`;
         }
       } catch (err) {
@@ -572,21 +585,24 @@
     }
 
     // =========================================================================
-    // 事前トークン数計算 (countTokens API)
+    // 正確なトークン数計算 (countTokens API)
     // =========================================================================
     let countDebounce = null;
     function triggerTokenCount() {
       clearTimeout(countDebounce);
+      const inputVal = document.getElementById('userInput').value;
+      const sysVal = document.getElementById('systemInstruction').value;
+      const badge = document.getElementById('tokenCounterBadge');
+      const totalChar = inputVal.length + sysVal.length;
+
+      badge.innerText = `${Math.ceil(totalChar / 2.5)} tokens (概算)`;
+
       countDebounce = setTimeout(async () => {
         const apiKey = document.getElementById('apiKeyInput').value.trim();
-        const model = document.getElementById('modelSelect').value;
-        const inputVal = document.getElementById('userInput').value;
-        const sysVal = document.getElementById('systemInstruction').value;
-        const badge = document.getElementById('tokenCounterBadge');
+        const modelPath = formatModelPath(document.getElementById('modelSelect').value);
 
-        const totalChar = inputVal.length + sysVal.length;
-        if (!apiKey || (!inputVal && !sysVal)) {
-          badge.innerText = `0 tokens (計${totalChar}文字)`;
+        if (!apiKey || totalChar === 0) {
+          badge.innerText = `0 tokens`;
           return;
         }
 
@@ -597,23 +613,30 @@
           const payload = { contents };
           if (sysVal) payload.systemInstruction = { parts: [{ text: sysVal }] };
 
-          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/${model}:countTokens?key=${apiKey}`, {
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/${modelPath}:countTokens?key=${apiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
           });
+
+          if (!res.ok) {
+            const errData = await res.json();
+            badge.innerText = `エラー: ${errData.error?.code || res.status}`;
+            return;
+          }
+
           const data = await res.json();
           if (data.totalTokens !== undefined) {
-            badge.innerText = `${data.totalTokens.toLocaleString()} tokens (計${totalChar}文字)`;
+            badge.innerText = `${data.totalTokens.toLocaleString()} tokens`;
           }
         } catch(e) {
-          badge.innerText = `計${totalChar}文字`;
+          badge.innerText = `概算: ${Math.ceil(totalChar / 2.5)} tok`;
         }
-      }, 500);
+      }, 400);
     }
 
     // =========================================================================
-    // ファイル添付 (ローカル Base64 & Drive ID)
+    // ファイル添付ハンドラ
     // =========================================================================
     function handleLocalAttachment(e) {
       const file = e.target.files[0];
@@ -660,7 +683,7 @@
     }
 
     // =========================================================================
-    // チャンクリスト描画 (Code Execution, InlineImage, Model InlineFiles 完全対応)
+    // チャンクリスト描画 (各種Chunkの完全分離表示)
     // =========================================================================
     function renderChunks() {
       const container = document.getElementById('chunksContainer');
@@ -669,7 +692,7 @@
       promptDoc.chunkedPrompt.chunks.forEach((chunk, chunkIdx) => {
         const row = document.createElement('div');
 
-        // A. ユーザー発言チャンク
+        // A. User
         if (chunk.role === 'user') {
           row.className = "p-3.5 sm:px-6 sm:py-4 bg-blue-50/30 flex flex-col sm:flex-row sm:gap-4 text-slate-800";
           
@@ -684,7 +707,7 @@
           if (chunk.inlineFile) {
             fileHtml += `
               <div class="mb-1.5 p-2 bg-slate-100 border border-slate-200 rounded text-xs font-mono text-slate-600 truncate">
-                📎 [インライン添付: ${escapeHtml(chunk.inlineFile.mimeType)}] (${Math.round((chunk.inlineFile.data?.length || 0) * 0.75 / 1024)} KB)
+                📎 [添付: ${escapeHtml(chunk.inlineFile.mimeType)}] (${Math.round((chunk.inlineFile.data?.length || 0) * 0.75 / 1024)} KB)
               </div>`;
           }
 
@@ -696,7 +719,7 @@
             </div>
           `;
         }
-        // B. 思考プロセス (Thinking Process)
+        // B. Thought
         else if (chunk.isThought) {
           row.className = "py-2 px-3.5 sm:px-6 bg-slate-50/20 text-xs text-slate-500";
           row.innerHTML = `
@@ -715,7 +738,7 @@
             </div>
           `;
         }
-        // C. 実行コード (executableCode: Python)
+        // C. Code Execution
         else if (chunk.executableCode) {
           row.className = "p-3.5 sm:px-6 sm:py-3 bg-slate-100/50 flex flex-col sm:flex-row sm:gap-4 text-slate-800";
           row.innerHTML = `
@@ -731,7 +754,7 @@
             </div>
           `;
         }
-        // D. コード実行結果 (codeExecutionResult: 出力・ターミナル)
+        // D. Code Result
         else if (chunk.codeExecutionResult) {
           row.className = "p-3.5 sm:px-6 sm:py-3 bg-slate-50/40 flex flex-col sm:flex-row sm:gap-4 text-slate-800";
           const isOk = chunk.codeExecutionResult.outcome === "OUTCOME_OK";
@@ -748,7 +771,7 @@
             </div>
           `;
         }
-        // E. モデル生成画像 (inlineImage)
+        // E. Image (Imagen等)
         else if (chunk.inlineImage) {
           row.className = "p-3.5 sm:px-6 sm:py-4 bg-white/40 flex flex-col sm:flex-row sm:gap-4 text-slate-900";
           row.innerHTML = `
@@ -764,7 +787,7 @@
             </div>
           `;
         }
-        // F. モデル生成ファイル (Model inlineFile)
+        // F. Model Generated File
         else if (chunk.inlineFile && chunk.role === 'model') {
           row.className = "p-3 sm:px-6 sm:py-3 bg-white/30 flex flex-col sm:flex-row sm:gap-4 text-slate-900";
           const approxKb = Math.round((chunk.inlineFile.data?.length || 0) * 0.75 / 1024);
@@ -782,7 +805,7 @@
             </div>
           `;
         }
-        // G. 通常テキスト回答 (Model text)
+        // G. Model Text
         else {
           row.className = "p-3.5 sm:px-6 sm:py-5 bg-white/40 flex flex-col sm:flex-row sm:gap-4 text-slate-900";
           let sourcesHtml = "";
@@ -815,36 +838,28 @@
       const apiKey = document.getElementById('apiKeyInput').value.trim();
       const inputElem = document.getElementById('userInput');
       const text = inputElem.value.trim();
-      const model = document.getElementById('modelSelect').value;
+      const rawModel = document.getElementById('modelSelect').value;
+      const model = formatModelPath(rawModel);
       const isStreaming = document.getElementById('enableStreaming').checked;
 
-      if (!apiKey) return alert('Gemini API Key を設定してください');
+      if (!apiKey) return alert('Gemini API Key を入力してください');
       if (!text && pendingAttachments.length === 0) return;
 
       pendingAttachments.forEach(att => {
         if (att.type === 'driveDocument') {
           promptDoc.chunkedPrompt.chunks.push({
-            driveDocument: { id: att.id },
-            role: "user",
-            tokenCount: 14000,
-            createTime: new Date().toISOString()
+            driveDocument: { id: att.id }, role: "user", tokenCount: 14000, createTime: new Date().toISOString()
           });
         } else if (att.type === 'inlineFile') {
           promptDoc.chunkedPrompt.chunks.push({
-            inlineFile: { mimeType: att.mimeType, data: att.data },
-            role: "user",
-            tokenCount: Math.round(att.data.length / 4),
-            createTime: new Date().toISOString()
+            inlineFile: { mimeType: att.mimeType, data: att.data }, role: "user", tokenCount: Math.round(att.data.length / 4), createTime: new Date().toISOString()
           });
         }
       });
 
       if (text) {
         promptDoc.chunkedPrompt.chunks.push({
-          text: text,
-          role: "user",
-          tokenCount: text.length,
-          createTime: new Date().toISOString()
+          text: text, role: "user", tokenCount: text.length, createTime: new Date().toISOString()
         });
       }
 
@@ -858,32 +873,23 @@
       runBtn.disabled = true;
       runBtn.innerText = '...';
 
-      // Imagen 画像生成モデルの場合
       if (model.includes('imagen')) {
         try {
           const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/${model}:predict?key=${apiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              instances: [{ prompt: text }],
-              parameters: { sampleCount: 1 }
-            })
+            body: JSON.stringify({ instances: [{ prompt: text }], parameters: { sampleCount: 1 } })
           });
+          if (!res.ok) throw new Error((await res.json()).error?.message || "通信エラー");
           const imgData = await res.json();
           const b64 = imgData.predictions?.[0]?.bytesBase64Encoded;
           if (b64) {
             promptDoc.chunkedPrompt.chunks.push({
-              inlineImage: { mimeType: "image/png", data: b64 },
-              role: "model",
-              parts: [{ inlineData: { mimeType: "image/png", data: b64 } }],
-              finishReason: "STOP",
-              createTime: new Date().toISOString()
+              inlineImage: { mimeType: "image/png", data: b64 }, role: "model", parts: [{ inlineData: { mimeType: "image/png", data: b64 } }], finishReason: "STOP", createTime: new Date().toISOString()
             });
-          } else {
-            alert('画像生成に失敗しました: ' + JSON.stringify(imgData));
           }
         } catch (e) {
-          alert('Imagen API通信エラー: ' + e.message);
+          alert('Imagen エラー: ' + e.message);
         } finally {
           runBtn.disabled = false;
           runBtn.innerText = 'Run';
@@ -893,34 +899,20 @@
         return;
       }
 
-      // Gemini コンテンツ生成
       const contents = [];
       for (const c of promptDoc.chunkedPrompt.chunks) {
         if (!c.isThought) {
           const parts = [];
-          if (c.inlineFile) {
-            parts.push({ inlineData: { mimeType: c.inlineFile.mimeType, data: c.inlineFile.data } });
-          }
-          if (c.inlineImage) {
-            parts.push({ inlineData: { mimeType: c.inlineImage.mimeType, data: c.inlineImage.data } });
-          }
-          if (c.executableCode) {
-            parts.push({ executableCode: c.executableCode });
-          }
-          if (c.codeExecutionResult) {
-            parts.push({ codeExecutionResult: c.codeExecutionResult });
-          }
+          if (c.inlineFile) parts.push({ inlineData: { mimeType: c.inlineFile.mimeType, data: c.inlineFile.data } });
+          if (c.inlineImage) parts.push({ inlineData: { mimeType: c.inlineImage.mimeType, data: c.inlineImage.data } });
+          if (c.executableCode) parts.push({ executableCode: c.executableCode });
+          if (c.codeExecutionResult) parts.push({ codeExecutionResult: c.codeExecutionResult });
+          
           if (c.driveDocument && driveAccessToken) {
             try {
-              const res = await fetch(`https://www.googleapis.com/drive/v3/files/${c.driveDocument.id}?alt=media`, {
-                headers: { Authorization: `Bearer ${driveAccessToken}` }
-              });
+              const res = await fetch(`https://www.googleapis.com/drive/v3/files/${c.driveDocument.id}?alt=media`, { headers: { Authorization: `Bearer ${driveAccessToken}` }});
               const blob = await res.blob();
-              const base64 = await new Promise(r => {
-                const fr = new FileReader();
-                fr.onload = () => r(fr.result.split(',')[1]);
-                fr.readAsDataURL(blob);
-              });
+              const base64 = await new Promise(r => { const fr = new FileReader(); fr.onload = () => r(fr.result.split(',')[1]); fr.readAsDataURL(blob); });
               parts.push({ inlineData: { mimeType: blob.type || "application/pdf", data: base64 } });
             } catch(e) {}
           }
@@ -961,7 +953,7 @@
 
         if (!res.ok) {
           const err = await res.json();
-          throw new Error(err.error?.message || "通信エラー");
+          throw new Error(`[${res.status}] ${err.error?.message || "通信エラー"}`);
         }
 
         if (isStreaming) {
@@ -989,12 +981,8 @@
                     for (const p of candidate.content.parts) {
                       if (p.thought) thoughtText += p.text || "";
                       else if (p.text) fullText += p.text || "";
-                      else if (p.executableCode) {
-                        promptDoc.chunkedPrompt.chunks.push({ role: "model", executableCode: p.executableCode, createTime: new Date().toISOString() });
-                      }
-                      else if (p.codeExecutionResult) {
-                        promptDoc.chunkedPrompt.chunks.push({ role: "model", codeExecutionResult: p.codeExecutionResult, createTime: new Date().toISOString() });
-                      }
+                      else if (p.executableCode) promptDoc.chunkedPrompt.chunks.push({ role: "model", executableCode: p.executableCode, createTime: new Date().toISOString() });
+                      else if (p.codeExecutionResult) promptDoc.chunkedPrompt.chunks.push({ role: "model", codeExecutionResult: p.codeExecutionResult, createTime: new Date().toISOString() });
                     }
                   }
                   if (candidate?.groundingMetadata) groundingMeta = candidate.groundingMetadata;
@@ -1007,12 +995,7 @@
 
           if (thoughtText) {
             promptDoc.chunkedPrompt.chunks.splice(promptDoc.chunkedPrompt.chunks.indexOf(modelChunk), 0, {
-              text: thoughtText,
-              role: "model",
-              isThought: true,
-              tokenCount: thoughtText.length,
-              parts: [{ text: thoughtPart.text, thought: true }],
-              createTime: new Date().toISOString()
+              text: thoughtText, role: "model", isThought: true, tokenCount: thoughtText.length, parts: [{ text: thoughtText, thought: true }], createTime: new Date().toISOString()
             });
           }
           if (groundingMeta) modelChunk.grounding = groundingMeta;
@@ -1021,23 +1004,11 @@
           const cand = data.candidates?.[0];
           if (cand?.content?.parts) {
             for (const p of cand.content.parts) {
-              if (p.thought) {
-                promptDoc.chunkedPrompt.chunks.push({
-                  text: p.text, role: "model", isThought: true, tokenCount: p.text.length, parts: [p], createTime: new Date().toISOString()
-                });
-              } else if (p.executableCode) {
-                promptDoc.chunkedPrompt.chunks.push({ role: "model", executableCode: p.executableCode, createTime: new Date().toISOString() });
-              } else if (p.codeExecutionResult) {
-                promptDoc.chunkedPrompt.chunks.push({ role: "model", codeExecutionResult: p.codeExecutionResult, createTime: new Date().toISOString() });
-              } else if (p.inlineData) {
-                promptDoc.chunkedPrompt.chunks.push({
-                  role: "model", inlineFile: { mimeType: p.inlineData.mimeType, data: p.inlineData.data }, createTime: new Date().toISOString()
-                });
-              } else if (p.text) {
-                promptDoc.chunkedPrompt.chunks.push({
-                  text: p.text, role: "model", parts: [p], grounding: cand.groundingMetadata || {}, finishReason: cand.finishReason || "STOP", createTime: new Date().toISOString()
-                });
-              }
+              if (p.thought) promptDoc.chunkedPrompt.chunks.push({ text: p.text, role: "model", isThought: true, tokenCount: p.text.length, parts: [p], createTime: new Date().toISOString() });
+              else if (p.executableCode) promptDoc.chunkedPrompt.chunks.push({ role: "model", executableCode: p.executableCode, createTime: new Date().toISOString() });
+              else if (p.codeExecutionResult) promptDoc.chunkedPrompt.chunks.push({ role: "model", codeExecutionResult: p.codeExecutionResult, createTime: new Date().toISOString() });
+              else if (p.inlineData) promptDoc.chunkedPrompt.chunks.push({ role: "model", inlineFile: { mimeType: p.inlineData.mimeType, data: p.inlineData.data }, createTime: new Date().toISOString() });
+              else if (p.text) promptDoc.chunkedPrompt.chunks.push({ text: p.text, role: "model", parts: [p], grounding: cand.groundingMetadata || {}, finishReason: cand.finishReason || "STOP", createTime: new Date().toISOString() });
             }
           }
         }
@@ -1066,7 +1037,6 @@
       promptDoc.runSettings.enableBrowseAsATool = document.getElementById('enableBrowseAsATool').checked;
     }
 
-    // インポート (.prompt / .json)
     function importPrompt(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -1099,9 +1069,10 @@
           document.getElementById('enableBrowseAsATool').checked = !!rs.enableBrowseAsATool;
 
           if (rs.model) {
+            const formatted = formatModelPath(rs.model);
             const sel = document.getElementById('modelSelect');
-            if (![...sel.options].some(o => o.value === rs.model)) sel.add(new Option(rs.model, rs.model));
-            sel.value = rs.model;
+            if (![...sel.options].some(o => o.value === formatted)) sel.add(new Option(formatted, formatted));
+            sel.value = formatted;
           }
 
           document.getElementById('systemInstruction').value = doc.systemInstruction?.parts?.[0]?.text || '';
@@ -1111,8 +1082,7 @@
           document.getElementById('saveStatus').innerText = '取込完了';
           triggerTokenCount();
         } catch (err) {
-          console.error("取込詳細エラー:", err);
-          alert('取込失敗: ' + err.message);
+          alert('JSON解析失敗: ' + err.message);
         }
       };
       reader.readAsText(file);
@@ -1128,7 +1098,6 @@
       a.click();
     }
 
-    // Google Drive 同期 (OAuth 2.0)
     function handleAuthClick() {
       const clientId = document.getElementById('oauthClientId').value.trim();
       if (!clientId) return alert('OAuth Client ID を設定してください');
