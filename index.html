@@ -252,6 +252,16 @@
           </label>
         </div>
 
+        <!-- 送信キー設定 -->
+        <div class="space-y-1.5 border-glass-t pt-3">
+          <span class="font-semibold uppercase tracking-wider text-[10px] text-slate-400 block">送信キー</span>
+          <select id="sendKeyMode" class="w-full bg-white/70 rounded px-2 py-1.5 text-slate-800 outline-none" onchange="saveSettingsToStorage()">
+            <option value="enter">Enterで送信 / Shift+Enterで改行</option>
+            <option value="ctrlEnter" selected>Ctrl(⌘)+Enterで送信 / Enterで改行</option>
+          </select>
+          <p class="text-[10px] text-slate-400 leading-snug">日本語などIME変換中のEnter確定では送信されません(いずれのモードでも)。</p>
+        </div>
+
         <!-- runSettings パラメータ -->
         <div class="space-y-3.5 border-glass-t pt-3">
           <span class="font-semibold uppercase tracking-wider text-[10px] text-slate-400 block">Run Settings</span>
@@ -453,8 +463,26 @@
     document.getElementById('responseSchema').addEventListener('input', saveSettingsToStorage);
     document.getElementById('functionDeclarations').addEventListener('input', saveSettingsToStorage);
 
+      document.getElementById('sendKeyMode').addEventListener('change', saveSettingsToStorage);
+
       document.getElementById('userInput').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
+        // IME(日本語など)変換確定のEnterでは絶対に送信しない
+        if (e.isComposing || e.keyCode === 229) return;
+
+        const mode = document.getElementById('sendKeyMode').value;
+        if (e.key !== 'Enter') return;
+
+        if (mode === 'ctrlEnter') {
+          // Ctrl+Enter (Macは⌘+Enter) で送信、素のEnterは改行のまま
+          if (e.ctrlKey || e.metaKey) {
+            e.preventDefault();
+            executePrompt();
+          }
+          return;
+        }
+
+        // mode === 'enter': Enterで送信、Shift+Enterで改行
+        if (!e.shiftKey) {
           e.preventDefault();
           executePrompt();
         }
@@ -477,6 +505,7 @@
         maxTokens: document.getElementById('maxTokens').value,
         thinkingLevel: document.getElementById('thinkingLevel').value,
         streaming: document.getElementById('enableStreaming').checked,
+        sendKeyMode: document.getElementById('sendKeyMode').value,
         code: document.getElementById('enableCodeExecution').checked,
         search: document.getElementById('enableSearchAsATool').checked,
         maps: document.getElementById('enableGoogleMaps').checked,
@@ -522,6 +551,7 @@
         }
         if (s.thinkingLevel) document.getElementById('thinkingLevel').value = s.thinkingLevel;
         if (s.streaming !== undefined) document.getElementById('enableStreaming').checked = s.streaming;
+        if (s.sendKeyMode) document.getElementById('sendKeyMode').value = s.sendKeyMode;
         if (s.code !== undefined) document.getElementById('enableCodeExecution').checked = s.code;
         if (s.search !== undefined) document.getElementById('enableSearchAsATool').checked = s.search;
         if (s.maps !== undefined) {
@@ -1072,10 +1102,10 @@
       const thinkingLevel = (promptDoc.runSettings.thinkingLevel || '').toLowerCase();
       if (thinkingLevel) {
         if (model.includes('gemini-3')) {
-          generationConfig.thinkingConfig = { thinkingLevel: thinkingLevel };
+          generationConfig.thinkingConfig = { thinkingLevel: thinkingLevel, includeThoughts: true };
         } else {
           const budgetMap = { low: 1024, medium: 8192, high: 24576 };
-          generationConfig.thinkingConfig = { thinkingBudget: budgetMap[thinkingLevel] ?? -1 };
+          generationConfig.thinkingConfig = { thinkingBudget: budgetMap[thinkingLevel] ?? -1, includeThoughts: true };
         }
       }
 
