@@ -652,6 +652,7 @@
         try {
           const contents = [];
           if (inputVal) contents.push({ role: "user", parts: [{ text: inputVal }] });
+          else if (sysVal) contents.push({ role: "user", parts: [{ text: " " }] }); // contentsは最低1件必要
 
           const payload = { contents };
           if (sysVal) payload.systemInstruction = { parts: [{ text: sysVal }] };
@@ -663,8 +664,10 @@
           });
 
           if (!res.ok) {
-            const errData = await res.json();
-            badge.innerText = `エラー: ${errData.error?.code || res.status}`;
+            const errData = await res.json().catch(() => ({}));
+            console.error('countTokens error:', res.status, errData);
+            badge.innerText = `エラー ${res.status}: ${errData.error?.message || res.statusText}`;
+            badge.title = errData.error?.message || '';
             return;
           }
 
